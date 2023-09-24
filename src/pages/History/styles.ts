@@ -53,3 +53,28 @@ export const HistoryList = styled.div`
 
   }
 `;
+
+// Object to map colors to rgb
+const STATUS_COLORS = {
+  yellow: 'yellow-500',
+  red: 'red-500',
+  green: 'green-500'
+} as const; // exclusivamente as 3 acima
+
+// Create props for status
+interface StatusProps{
+  statusColor: keyof typeof STATUS_COLORS; // cores disponiveis sao as keys do tipo STATUS_COLORS object
+}
+
+export const Status = styled.span<StatusProps>`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  &::before{
+    content: "";
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background-color: ${(props) => props.theme[STATUS_COLORS[props.statusColor]]}
+  }
+`;

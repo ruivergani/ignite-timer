@@ -13,6 +13,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod'; // integrate with ZOD
 import * as zod from 'zod';
 
+// Zod Schema
 const newCycleFormValidationSchema = zod.object({
   task: zod.string().min(1, 'Write Your Task'), // string, min 1 char, message: Write Your Task
   minutesAmount: zod.number().min(5).max(60),
@@ -23,7 +24,7 @@ type NewCycleFormData =  zod.infer<typeof newCycleFormValidationSchema> // Same 
 export function Home() {
   
   // React Hook Form + Zod Validation
-  const {register, handleSubmit, watch, formState} = useForm<NewCycleFormData>({
+  const {register, handleSubmit, watch, formState, reset} = useForm<NewCycleFormData>({
     resolver: zodResolver(newCycleFormValidationSchema),
     defaultValues:{
       task: '',
@@ -33,6 +34,7 @@ export function Home() {
 
   function handleCreateNewCycle(data: NewCycleFormData){
     console.log(data);
+    reset(); // clear and reset all inputs after form submitted (based on defaultValues)
   }
 
   // Disable Submit button

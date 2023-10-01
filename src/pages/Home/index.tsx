@@ -10,19 +10,30 @@ import {
 }
   from "./styles";
 import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod'; // integrate with ZOD
+import * as zod from 'zod';
+
+const newCycleFormValidationSchema = zod.object({
+  task: zod.string().min(1, 'Write Your Task'), // string, min 1 char, message: Write Your Task
+  minutesAmountInput: zod.number().min(5).max(60),
+})
 
 export function Home() {
-
-  const {register, handleSubmit, watch} = useForm();
+  // React Hook Form + Zod Validation
+  const {register, handleSubmit, watch, formState} = useForm({
+    resolver: zodResolver(newCycleFormValidationSchema),
+  });
 
   function handleCreateNewCycle(data: any){
     console.log(data);
   }
 
   // Disable Submit button
-  const taskSize = watch('task'); // Observar o campo do formulario
+  const taskSize = watch('task'); // Observe the field
   const isSubmitDisabled = !taskSize;
-  
+
+  console.log(formState.errors) // Manipulate the errors
+
   return (
     <HomeContainer>
       {/* Form */}

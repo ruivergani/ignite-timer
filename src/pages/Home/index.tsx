@@ -15,16 +15,23 @@ import * as zod from 'zod';
 
 const newCycleFormValidationSchema = zod.object({
   task: zod.string().min(1, 'Write Your Task'), // string, min 1 char, message: Write Your Task
-  minutesAmountInput: zod.number().min(5).max(60),
+  minutesAmount: zod.number().min(5).max(60),
 })
 
+type NewCycleFormData =  zod.infer<typeof newCycleFormValidationSchema> // Same as creating Interface => infer from the zod schema automatically the types (extract inferred type)
+
 export function Home() {
+  
   // React Hook Form + Zod Validation
-  const {register, handleSubmit, watch, formState} = useForm({
+  const {register, handleSubmit, watch, formState} = useForm<NewCycleFormData>({
     resolver: zodResolver(newCycleFormValidationSchema),
+    defaultValues:{
+      task: '',
+      minutesAmount: 0,
+    }
   });
 
-  function handleCreateNewCycle(data: any){
+  function handleCreateNewCycle(data: NewCycleFormData){
     console.log(data);
   }
 

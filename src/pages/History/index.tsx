@@ -5,7 +5,7 @@ export function History() {
     <HistoryContainer>
       <h1>My History</h1>
       <HistoryList>
-        <table>
+        <table> 
           <thead>
             <tr>
               <th>Task</th>

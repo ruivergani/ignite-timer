@@ -26,13 +26,13 @@ interface Cycle{
   id: string,
   task: string,
   minutesAmount: number,
-  
 }
 
 export function Home() {
   // States
   const [cycles, setCycles] = useState<Cycle[]>([]); // array of Cycle
-  const [activeCycleId, setActiveCycleId] = useState<string | null>(null) // cycle active or not
+  const [activeCycleId, setActiveCycleId] = useState<string | null>(null); // cycle active or not
+  const [amountSecondsPassed, setAmountSecondsPassed] = useState<number>(0); // quantidade de segundos passados quando o ciclo foi criado
   
   // React Hook Form + Zod Validation
   const {register, handleSubmit, watch, formState, reset} = useForm<NewCycleFormData>({
@@ -58,6 +58,16 @@ export function Home() {
 
   // Show the active cycle
   const activeCycle = cycles.find((cycle) => cycle.id === activeCycleId);
+
+  // Convert minutes to seconds (calculations section)
+  const totalSeconds = activeCycle ? activeCycle.minutesAmount * 60 : 0; // if ternario (se tiver ciclo ativo multiplica por 60 senao e 0)
+  const currentSeconds = activeCycle ? totalSeconds - amountSecondsPassed : 0;
+
+  const minutesAmount = Math.floor(currentSeconds / 60); // arredonda para baixo (minutos em segundos)
+  const secondsAmount = currentSeconds % 60; // segundos restantes 
+
+  const minutes = String(minutesAmount).padStart(2,'0'); // padStart preenche a variavel com algum character
+  const seconds = String(secondsAmount).padStart(2,'0');
 
   // Disable Submit button
   const taskSize = watch('task'); // Observe the field
@@ -99,11 +109,11 @@ export function Home() {
         </FormContainer>
         {/* Countdown */}
         <CountdownContainer>
-          <span>0</span>
-          <span>0</span>
+          <span>{minutes[0]}</span>
+          <span>{minutes[1]}</span>
           <Separator>:</Separator>
-          <span>0</span>
-          <span>0</span>
+          <span>{seconds[0]}</span>
+          <span>{seconds[1]}</span>
         </CountdownContainer>
         {/* Button */}
         <StartCountdownButton type="submit" disabled={isSubmitDisabled}>

@@ -12,7 +12,8 @@ import {
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod'; // integrate with ZOD
 import * as zod from 'zod';
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { differenceInSeconds } from 'date-fns';
 
 // Zod Schema
 const newCycleFormValidationSchema = zod.object({
@@ -26,6 +27,7 @@ interface Cycle{
   id: string,
   task: string,
   minutesAmount: number,
+  startDate: Date, // data ou horario
 }
 
 export function Home() {
@@ -43,11 +45,26 @@ export function Home() {
     }
   });
 
+  // Show the active cycle
+  const activeCycle = cycles.find((cycle) => cycle.id === activeCycleId);
+
+  // useEffect = 
+  useEffect(() => {
+    if(activeCycle){
+      setInterval(() => { // Do something every 1000 milliseconds (1 second)
+        setAmountSecondsPassed(
+          differenceInSeconds(new Date(), activeCycle.startDate), // Primeiro parametro data atual - data de inicio do ciclo
+        )
+      }, 1000)
+    }
+  }, [activeCycle]) // sempre que usar uma variavel externa tem que passar no useEffect
+
   function handleCreateNewCycle(data: NewCycleFormData){
     const newCycle: Cycle = {
       id: String(new Date().getTime()), // date to milliseconds (always different IDs)
       task: data.task,
-      minutesAmount: data.minutesAmount
+      minutesAmount: data.minutesAmount,
+      startDate: new Date(), // data atual
     }
 
     setCycles((state) => [...state, newCycle]); // add new cycle to array
@@ -55,9 +72,6 @@ export function Home() {
 
     reset(); // clear and reset all inputs after form submitted (based on defaultValues)
   }
-
-  // Show the active cycle
-  const activeCycle = cycles.find((cycle) => cycle.id === activeCycleId);
 
   // Convert minutes to seconds (calculations section)
   const totalSeconds = activeCycle ? activeCycle.minutesAmount * 60 : 0; // if ternario (se tiver ciclo ativo multiplica por 60 senao e 0)

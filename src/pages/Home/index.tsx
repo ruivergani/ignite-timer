@@ -48,16 +48,20 @@ export function Home() {
   // Show the active cycle
   const activeCycle = cycles.find((cycle) => cycle.id === activeCycleId);
 
-  // useEffect = 
   useEffect(() => {
+    let interval: number;
     if(activeCycle){
-      setInterval(() => { // Do something every 1000 milliseconds (1 second)
+      interval = setInterval(() => { // Do something every 1000 milliseconds (1 second)
         setAmountSecondsPassed(
-          differenceInSeconds(new Date(), activeCycle.startDate), // Primeiro parametro data atual - data de inicio do ciclo
+          differenceInSeconds(new Date(), activeCycle.startDate), // Date FNS Library (Actual Date - Start Date)
         )
       }, 1000)
     }
-  }, [activeCycle]) // sempre que usar uma variavel externa tem que passar no useEffect
+    // Delete previous interval used
+    return () => {
+      clearInterval(interval)
+    }
+  }, [activeCycle]) // sempre que usar uma variavel externa tem que passar a variavel como dependencia do useEffect (toda vez que activeCycle mudar o codigo renderiza novamente)
 
   function handleCreateNewCycle(data: NewCycleFormData){
     const newCycle: Cycle = {
@@ -69,6 +73,7 @@ export function Home() {
 
     setCycles((state) => [...state, newCycle]); // add new cycle to array
     setActiveCycleId(newCycle.id); // set ID of active cycle
+    setAmountSecondsPassed(0);
 
     reset(); // clear and reset all inputs after form submitted (based on defaultValues)
   }
@@ -82,6 +87,13 @@ export function Home() {
 
   const minutes = String(minutesAmount).padStart(2,'0'); // padStart preenche a variavel com algum character
   const seconds = String(secondsAmount).padStart(2,'0');
+
+  // Update Title of the window
+  useEffect(() => {
+    if(activeCycle){
+      document.title= `${minutes}:${seconds}`;
+    }
+  }, [minutes, seconds, activeCycle])
 
   // Disable Submit button
   const taskSize = watch('task'); // Observe the field

@@ -1,14 +1,11 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect } from "react";
 import { CountdownContainer, Separator } from "./styles";
 import { differenceInSeconds } from "date-fns";
 import { CyclesContext } from "../..";
 
 export function Countdown() {
   // Context
-  const { activeCycle, activeCycleId, markCurrentCycleAsFinished } = useContext(CyclesContext);
-
-  // Quantidade de segundos passados quando o ciclo foi criado
-  const [amountSecondsPassed, setAmountSecondsPassed] = useState<number>(0);
+  const { activeCycle, activeCycleId, markCurrentCycleAsFinished, amountSecondsPassed, setSecondsPassed } = useContext(CyclesContext);
 
   const totalSeconds = activeCycle ? activeCycle.minutesAmount * 60 : 0; // if ternario (se tiver ciclo ativo multiplica por 60 senao e 0)
 
@@ -40,11 +37,11 @@ export function Countdown() {
         // Total de segundos maior ou igual numero de tempo que o ciclo tem
         if (secondsDifference >= totalSeconds) {
           markCurrentCycleAsFinished()
-          setAmountSecondsPassed(totalSeconds)
+          setSecondsPassed(totalSeconds)
           clearInterval(interval)
         }
         else {
-          setAmountSecondsPassed(secondsDifference)
+          setSecondsPassed(secondsDifference)
         }
       }, 1000)
     }
@@ -52,7 +49,7 @@ export function Countdown() {
     return () => {
       clearInterval(interval)
     }
-  }, [activeCycle, totalSeconds, activeCycleId, markCurrentCycleAsFinished]) // sempre que usar uma variavel externa tem que passar a variavel como dependencia do useEffect (toda vez que activeCycle mudar o codigo renderiza novamente)
+  }, [activeCycle, totalSeconds, activeCycleId, markCurrentCycleAsFinished, setSecondsPassed]) // sempre que usar uma variavel externa tem que passar a variavel como dependencia do useEffect (toda vez que activeCycle mudar o codigo renderiza novamente)
 
   return (
     <CountdownContainer>

@@ -6,10 +6,13 @@ import {
 }
   from "./styles";
 
-import { createContext, useEffect, useState } from "react";
-import { differenceInSeconds } from 'date-fns';
+import { createContext, useState } from "react";
+
 import { NewCycleForm } from "./components/NewCycleForm";
 import { Countdown } from "./components/Countdown";
+import { zodResolver } from "@hookform/resolvers/zod"; // integrate with ZOD
+import { FormProvider, useForm } from "react-hook-form";
+import * as zod from 'zod';
 
 interface Cycle {
   id: string,
@@ -22,15 +25,37 @@ interface Cycle {
 interface CycleContextData {
   activeCycle: Cycle | undefined // quando nao tiver cycle ativo vai ser undefined
   activeCycleId: String | null
+  amountSecondsPassed: number
   markCurrentCycleAsFinished: () => void // funcao sem retorno
+  setSecondsPassed: (seconds: number) => void
 }
 // Criar Context (share values between components)
 export const CyclesContext = createContext({} as CycleContextData) // export para o Countdown accesar o contexto
+
+// Zod Schema
+const newCycleFormValidationSchema = zod.object({
+  task: zod.string().min(1, 'Write Your Task'), // string, min 1 char, message: Write Your Task
+  minutesAmount: zod.number().min(5).max(60),
+})
+// Type useForm
+type NewCycleFormData = zod.infer<typeof newCycleFormValidationSchema> // Same as creating Interface => infer from the zod schema automatically the types (extract inferred type)
 
 export function Home() {
   // States
   const [cycles, setCycles] = useState<Cycle[]>([]); // array of Cycle
   const [activeCycleId, setActiveCycleId] = useState<string | null>(null); // cycle active or not
+  // Quantidade de segundos passados quando o ciclo foi criado
+  const [amountSecondsPassed, setAmountSecondsPassed] = useState<number>(0);
+
+  // React Hook Form + Zod Validation
+  const newCycleForm = useForm<NewCycleFormData>({
+    resolver: zodResolver(newCycleFormValidationSchema),
+    defaultValues: {
+      task: '',
+      minutesAmount: 0,
+    }
+  });
+  const {handleSubmit, watch, reset} = newCycleForm; // Desestruturar variavel acima
 
   // Show the active cycle
   const activeCycle = cycles.find((cycle) => cycle.id === activeCycleId);
@@ -75,13 +100,13 @@ export function Home() {
       }),
     )
   }
+  function setSecondsPassed(seconds: number){
+    setAmountSecondsPassed(seconds)
+  }
 
   // Disable Submit button
   const taskSize = watch('task'); // Observe the field
   const isSubmitDisabled = !taskSize;
-
-  // Manipulate form errors
-  console.log(formState.errors);
 
   /* 
     Prop Drilling => Quando a gente tem MUITAS propriedades APENAS para comunicacao entre componentes
@@ -93,8 +118,10 @@ export function Home() {
       {/* Form */}
       <form action="" onSubmit={handleSubmit(handleCreateNewCycle)}>
         {/* Context Provider */}
-        <CyclesContext.Provider value={{ activeCycle, activeCycleId, markCurrentCycleAsFinished}}>
-          <NewCycleForm />
+        <CyclesContext.Provider value={{ activeCycle, activeCycleId, markCurrentCycleAsFinished, amountSecondsPassed, setSecondsPassed }}>
+          <FormProvider {...newCycleForm}> {/* Passa as propriedades como uma propriedade para o formProvider */}
+            <NewCycleForm />
+          </FormProvider>
           <Countdown />
         </CyclesContext.Provider>
         {/* Button */}

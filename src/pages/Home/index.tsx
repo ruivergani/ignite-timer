@@ -37,6 +37,11 @@ export function Home() {
   const taskSize = watch('task'); // Observe the field
   const isSubmitDisabled = !taskSize;
 
+  function handleCreateNewCycle(data: NewCycleFormData){
+    createNewCycle(data)
+    reset()
+  }
+
   /* 
     Prop Drilling => Quando a gente tem MUITAS propriedades APENAS para comunicacao entre componentes
     Context API => Permite compartilharmos informacoes entre VARIOS componentes ao mesmo tempo
@@ -45,7 +50,7 @@ export function Home() {
   return (
     <HomeContainer>
       {/* Form */}
-      <form action="" onSubmit={handleSubmit(createNewCycle)}>
+      <form action="" onSubmit={handleSubmit(handleCreateNewCycle)}>
           <FormProvider {...newCycleForm}> {/* Passa as propriedades como uma propriedade para o formProvider */}
             <NewCycleForm />
           </FormProvider>

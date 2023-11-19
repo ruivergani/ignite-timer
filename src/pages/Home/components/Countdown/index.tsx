@@ -32,7 +32,7 @@ export function Countdown() {
         // Date FNS Library (Actual Date - Start Date)
         const secondsDifference = differenceInSeconds(
           new Date(),
-          activeCycle.startDate
+          new Date(activeCycle.startDate),
         );
         // Total de segundos maior ou igual numero de tempo que o ciclo tem
         if (secondsDifference >= totalSeconds) {

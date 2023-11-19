@@ -1,6 +1,7 @@
-import { ReactNode, createContext, useState, useReducer } from "react"
+import { ReactNode, createContext, useState, useReducer, useEffect } from "react"
 import { Cycle, cyclesReducer} from '../reducers/cycles/reducer';
 import { ActionTypes, addNewCycleAction, interruptCurrentCycleAction, markCurrentCycleAsFinishedAction } from "../reducers/cycles/actions";
+import { differenceInSeconds } from "date-fns";
 
 interface CreateCycleData {
   task: string
@@ -21,12 +22,34 @@ export const CyclesContext = createContext({} as CycleContextData) // export par
 interface CyclesContextProviderProps {
   children: ReactNode // qualquer jsx valido
 }
+
 export function CyclesContextProvider({ children, }: CyclesContextProviderProps) {
   // States
-  const [cyclesState, dispatch] = useReducer(cyclesReducer, { cycles: [], activeCycleId: null })
-  const [amountSecondsPassed, setAmountSecondsPassed] = useState<number>(0); // Quantidade de segundos passados quando o ciclo foi criado
+  const [cyclesState, dispatch] = useReducer(
+    cyclesReducer, 
+    { cycles: [], activeCycleId: null },
+    () => {
+      const storedStateAsJSON = localStorage.getItem('@ignite-timer:cycles-state-1.0.0')
+      if(storedStateAsJSON){
+        return JSON.parse(storedStateAsJSON)
+      }
+    }
+  ) // Reducer
   const { cycles, activeCycleId } = cyclesState; // Destruturacao
   const activeCycle = cycles.find((cycle) => cycle.id === activeCycleId); // Show the active cycle
+
+  const [amountSecondsPassed, setAmountSecondsPassed] = useState<number>(() => {
+    if(activeCycle){
+      return  differenceInSeconds(new Date(), new Date(activeCycle.startDate),);
+    }
+    return 0
+  }); // Quantidade de segundos passados quando o ciclo foi criado
+  
+  // Toda vez que o cyclesState modificar => salvar no localStorage
+  useEffect(() => {
+    const stateJSON = JSON.stringify(cyclesState)
+    localStorage.setItem('@ignite-timer:cycles-state-1.0.0', stateJSON)
+  }, [cyclesState]);
 
   function markCurrentCycleAsFinished() {
     // Using Reducer

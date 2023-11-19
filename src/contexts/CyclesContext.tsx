@@ -1,4 +1,4 @@
-import { ReactNode, createContext, useState } from "react"
+import { ReactNode, createContext, useState, useReducer } from "react"
 
 interface CreateCycleData {
   task: string
@@ -28,60 +28,102 @@ export const CyclesContext = createContext({} as CycleContextData) // export par
 interface CyclesContextProviderProps {
   children: ReactNode // qualquer jsx valido
 }
-export function CyclesContextProvider({children, } : CyclesContextProviderProps){
-    // States
-    const [cycles, setCycles] = useState<Cycle[]>([]); // array of Cycle
-    const [activeCycleId, setActiveCycleId] = useState<string | null>(null); // cycle active or not
-    // Quantidade de segundos passados quando o ciclo foi criado
-    const [amountSecondsPassed, setAmountSecondsPassed] = useState<number>(0);
-
-    // Show the active cycle
-    const activeCycle = cycles.find((cycle) => cycle.id === activeCycleId);
-
-    function markCurrentCycleAsFinished() {
-      setCycles((state) =>
-        state.map((cycle) => {
-          if (cycle.id === activeCycleId) {
-            return { ...cycle, finishedDate: new Date() }
-          }
-          else {
-            return cycle
-          }
-        }),
-      )
-    }
-    function setSecondsPassed(seconds: number){
-      setAmountSecondsPassed(seconds)
-    }
-    function createNewCycle(data: CreateCycleData) {
-      const newCycle: Cycle = {
-        id: String(new Date().getTime()), // date to milliseconds (always different IDs)
-        task: data.task,
-        minutesAmount: data.minutesAmount,
-        startDate: new Date(), // data atual
+interface CyclesState {
+  cycles: Cycle[]
+  activeCycleId: string | null
+}
+export function CyclesContextProvider({ children, }: CyclesContextProviderProps) {
+  // States
+  const [cyclesState, dispatch] = useReducer((state: CyclesState, action: any) => {
+    //console.log(state);
+    //console.log(action);
+    if (action.type === 'ADD_NEW_CYCLE') {
+      return {
+        ...state,
+        cycles: [...state.cycles, action.payload.newCycle],
+        activeCycleId: action.payload.newCycle.id,
       }
-  
-      setCycles((state) => [...state, newCycle]); // add new cycle to array
-      setActiveCycleId(newCycle.id); // set ID of active cycle
-      setAmountSecondsPassed(0);
-  
-      //reset(); // clear and reset all inputs after form submitted (based on defaultValues)
     }
-    function interruptCurrentCycle() {
-      // Anotar dentro do ciclo se ele foi interrompido ou nao
-      setCycles((state) =>
-        state.map((cycle) => {
-          if (cycle.id === activeCycleId) {
-            return { ...cycle, interruptedDate: new Date() }
-          }
-          else {
-            return cycle
-          }
-        }),
-      )
-      setActiveCycleId(null) // reset activeCycle
+    if (action.type === 'INTERRUPT_CURRENT_CYCLE') {
+      return {
+        ...state,
+        cycles: [
+          state.cycles.map((cycle) => {
+            if (cycle.id === state.activeCycleId) {
+              return { ...cycle, interruptedDate: new Date() }
+            }
+            else {
+              return cycle
+            }
+          }),],
+        activeCycleId: null,
+      }
     }
-  
+    if (action.type === 'MARK_CURRENT_CYCLE_AS_FINISHED') {
+      return {
+        ...state,
+        cycles: [
+          state.cycles.map((cycle) => {
+            if (cycle.id === state.activeCycleId) {
+              return { ...cycle, finishedDate: new Date() }
+            }
+            else {
+              return cycle
+            }
+          }),],
+        activeCycleId: null,
+      }
+    }
+    return state
+  }, { // initial values
+    cycles: [],
+    activeCycleId: null
+  })
+  const [amountSecondsPassed, setAmountSecondsPassed] = useState<number>(0); // Quantidade de segundos passados quando o ciclo foi criado
+  const { cycles, activeCycleId } = cyclesState; // Destruturacao
+  const activeCycle = cycles.find((cycle) => cycle.id === activeCycleId); // Show the active cycle
+
+  function markCurrentCycleAsFinished() {
+    // Using Reducer
+    dispatch({
+      type: 'MARK_CURRENT_CYCLE_AS_FINISHED',
+      payload: {
+        activeCycleId,
+      },
+    })
+  }
+  function setSecondsPassed(seconds: number) {
+    setAmountSecondsPassed(seconds)
+  }
+  function createNewCycle(data: CreateCycleData) {
+    const newCycle: Cycle = {
+      id: String(new Date().getTime()), // date to milliseconds (always different IDs)
+      task: data.task,
+      minutesAmount: data.minutesAmount,
+      startDate: new Date(), // data atual
+    }
+    // Using Reducer
+    dispatch({
+      type: 'ADD_NEW_CYCLE',
+      payload: {
+        newCycle,
+      },
+    })
+
+    // setCycles((state) => [...state, newCycle]); // add new cycle to array
+    setAmountSecondsPassed(0);
+
+    //reset(); // clear and reset all inputs after form submitted (based on defaultValues)
+  }
+  function interruptCurrentCycle() {
+    // Using Reducer
+    dispatch({
+      type: 'INTERRUPT_CURRENT_CYCLE',
+      payload: {
+        activeCycleId,
+      },
+    })
+  }
   return (
     <CyclesContext.Provider value={
       {
@@ -94,7 +136,7 @@ export function CyclesContextProvider({children, } : CyclesContextProviderProps)
         createNewCycle,
         interruptCurrentCycle
       }}>
-        {children}
+      {children}
     </CyclesContext.Provider>
   )
 }

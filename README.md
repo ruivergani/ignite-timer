@@ -29,7 +29,8 @@ ___
 The page in desktop format is seen in the image below:
 \
 \
-<img width="1507" alt="Screenshot 2023-11-19 at 20 19 08" src="https://github.com/ruivergani/ignite-timer/assets/70537459/4059004d-78e3-4012-b1e4-575646c26797">
+![Screenshot 2024-02-04 at 19 33 53](https://github.com/ruivergani/ignite-timer/assets/70537459/f2c586fc-bdb7-4d4d-8de7-ec02b63b1d4e)
+
 
 ___
 

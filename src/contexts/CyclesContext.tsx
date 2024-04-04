@@ -1,6 +1,6 @@
 import { ReactNode, createContext, useState, useReducer, useEffect } from "react"
 import { Cycle, cyclesReducer} from '../reducers/cycles/reducer';
-import { ActionTypes, addNewCycleAction, interruptCurrentCycleAction, markCurrentCycleAsFinishedAction } from "../reducers/cycles/actions";
+import { addNewCycleAction, interruptCurrentCycleAction, markCurrentCycleAsFinishedAction } from "../reducers/cycles/actions";
 import { differenceInSeconds } from "date-fns";
 
 interface CreateCycleData {
@@ -26,7 +26,7 @@ interface CyclesContextProviderProps {
 export function CyclesContextProvider({ children, }: CyclesContextProviderProps) {
   // States
   const [cyclesState, dispatch] = useReducer(
-    cyclesReducer, 
+    cyclesReducer,
     { cycles: [], activeCycleId: null },
     (initialState) => {
       const storedStateAsJSON = localStorage.getItem('@ignite-timer:cycles-state-1.0.0')
@@ -45,7 +45,7 @@ export function CyclesContextProvider({ children, }: CyclesContextProviderProps)
     }
     return 0
   }); // Quantidade de segundos passados quando o ciclo foi criado
-  
+
   // Toda vez que o cyclesState modificar => salvar no localStorage
   useEffect(() => {
     const stateJSON = JSON.stringify(cyclesState)

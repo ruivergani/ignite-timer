@@ -29,8 +29,7 @@ ___
 The page in desktop format is seen in the image below:
 \
 \
-![Screenshot 2024-02-04 at 19 33 53](https://github.com/ruivergani/ignite-timer/assets/70537459/f2c586fc-bdb7-4d4d-8de7-ec02b63b1d4e)
-
+![Screenshot 2024-04-04 at 11 08 46](https://github.com/ruivergani/ignite-timer/assets/70537459/4c6b2b18-f6e9-4d02-918b-87eaf14a235a)
 
 ___
 
